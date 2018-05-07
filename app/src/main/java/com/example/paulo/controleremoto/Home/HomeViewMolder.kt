@@ -8,9 +8,13 @@ import com.example.paulo.controleremotoarduino.AdapterBluetooth
 
 class HomeViewHolder(val mActivity: Activity, val mContext: Context) {
 
-    fun setRecyclerView(recyclerView: RecyclerView, adapter: AdapterBluetooth){
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(mActivity)
-        recyclerView.adapter = adapter
+    fun setRecyclerView(recyclerView: RecyclerView, adapter: AdapterBluetooth, viewManager: LinearLayoutManager){
+
+        recyclerView.apply {
+            this.setHasFixedSize(true)
+            this.layoutManager = viewManager
+            this.adapter = adapter
+        }
+
     }
 }
