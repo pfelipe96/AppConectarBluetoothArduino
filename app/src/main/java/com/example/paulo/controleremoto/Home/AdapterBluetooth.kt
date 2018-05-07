@@ -28,7 +28,6 @@ class AdapterBluetooth(val mActivity: Activity, val mContext : Context, val mDat
         val mHolder = holder as CardViewInformationDevice
 
         mHolder.mNameDevice.text = mDataSet[position]
-
     }
 
 }

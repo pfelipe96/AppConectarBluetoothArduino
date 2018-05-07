@@ -40,34 +40,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var mViewManager: LinearLayoutManager
     private var mArrayAdapter: ArrayList<String> = ArrayList()
 
-    private val mBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (action == BluetoothDevice.ACTION_FOUND) {
-                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                mArrayAdapter.add(device.name + "\n" + device.address)
-                mArrayAdapter.add("Teste")
-                mAdapterBluetooth.notifyDataSetChanged()
-            }
-        }
-    }
-
-    private val mBroadcastReceiver1 = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            // When discovery finds a device
-            if (action == BluetoothAdapter.ACTION_STATE_CHANGED) {
-                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
-
-                when (state) {
-                    BluetoothAdapter.STATE_OFF -> Log.d("TAG", "onReceive: STATE OFF")
-                    BluetoothAdapter.STATE_TURNING_OFF -> Log.d("TAG", "mBroadcastReceiver1: STATE TURNING OFF")
-                    BluetoothAdapter.STATE_ON -> Log.d("TAG", "mBroadcastReceiver1: STATE ON")
-                    BluetoothAdapter.STATE_TURNING_ON -> Log.d("TAG", "mBroadcastReceiver1: STATE TURNING ON")
-                }
-            }
-        }
-    }
+    private lateinit var mBroadcastReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,17 +55,15 @@ class HomeActivity : AppCompatActivity() {
 
         mBluetooth = BluetoothAdapter.getDefaultAdapter()
 
+        getReceiveDevices()
+
         if(mBluetooth != null){
             if(!mBluetooth!!.isEnabled){
                 var enableBluetoothAdapter = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBluetoothAdapter, REQUEST_ENABLE_BLUETOOTH)
 
             }
-
-            val BTIntent = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-            registerReceiver(mBroadcastReceiver1, BTIntent)
             findDevices()
-
         }else{
             Toast.makeText(this, "Seu dispostivo não suporta bluetooth", Toast.LENGTH_LONG).show()
         }
@@ -119,6 +90,19 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun getReceiveDevices(){
+        mBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val action = intent.action
+                if (action == BluetoothDevice.ACTION_FOUND) {
+                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    mArrayAdapter.add(device.name + "\n" + device.address)
+                    mAdapterBluetooth.notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
     private fun deviceAlreadyPaired(){
         mBluetoothDevicePaired = mBluetooth!!.bondedDevices
 
@@ -127,10 +111,6 @@ class HomeActivity : AppCompatActivity() {
                 mArrayAdapter.add(it.name+"\n"+it.address)
             }
         }
-    }
-
-    private fun setDiscoverable(){
-        val intentDiscoverable = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

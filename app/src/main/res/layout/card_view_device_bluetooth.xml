@@ -11,7 +11,7 @@
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/name_device"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:layout_gravity="center"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
