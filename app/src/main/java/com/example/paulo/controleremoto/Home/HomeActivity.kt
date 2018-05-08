@@ -12,19 +12,25 @@ import android.databinding.ViewDataBinding
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.annotation.RequiresApi
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.Toolbar
 import android.widget.Toast
 import com.example.paulo.controleremoto.BR
 import com.example.paulo.controleremoto.R
 import com.example.paulo.controleremotoarduino.AdapterBluetooth
 import kotlinx.android.synthetic.main.activity_home.*
+import android.databinding.adapters.TextViewBindingAdapter.setText
+
+
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var mBluetooth : BluetoothAdapter
     private val REQUEST_ENABLE_BLUETOOTH = 110
     private lateinit var mBluetoothDevicePaired: Set<BluetoothDevice>
+    private lateinit var mToolbar: Toolbar
 
     private lateinit var mHomeViewHolder: HomeViewHolder
 
@@ -48,6 +54,10 @@ class HomeActivity : AppCompatActivity() {
         mBluetooth = BluetoothAdapter.getDefaultAdapter()
 
         getReceiveDevices()
+
+        mToolbar = findViewById(R.id.toolbarID)
+
+        mHomeViewHolder.setToolbar(this, mToolbar)
 
         if(mBluetooth != null){
             if(!mBluetooth!!.isEnabled){
@@ -86,9 +96,23 @@ class HomeActivity : AppCompatActivity() {
             override fun onReceive(context: Context, intent: Intent) {
                 val action = intent.action
                 if (action == BluetoothDevice.ACTION_FOUND) {
-                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    mArrayAdapter.add(ConstructorAdapter(device.name,device.address))
-                    mAdapterBluetooth.notifyDataSetChanged()
+                    var device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    runOnUiThread({
+
+                        object : CountDownTimer(12000, 1000){
+                            override fun onTick(millisUntilFinished: Long) {
+                                mArrayAdapter.add(ConstructorAdapter(if(device.name.isNullOrEmpty()) "Sem nome" else device.name, if(device.address.isNullOrEmpty()) "Sem mac" else device.address))
+                            }
+
+                            override fun onFinish() {
+                                if(mArrayAdapter.isNotEmpty())
+                                    mArrayAdapter.add(ConstructorAdapter(if(device.name.isNullOrEmpty()) "Sem nome" else device.name, if(device.address.isNullOrEmpty()) "Sem mac" else device.address))
+                                else
+                                    false
+
+                            }
+                        }
+                    })
                 }
             }
         }

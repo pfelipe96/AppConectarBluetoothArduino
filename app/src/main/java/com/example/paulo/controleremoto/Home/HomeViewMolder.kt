@@ -2,8 +2,10 @@ package com.example.paulo.controleremoto.Home
 
 import android.app.Activity
 import android.content.Context
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.Toolbar
 import com.example.paulo.controleremotoarduino.AdapterBluetooth
 
 class HomeViewHolder(val mActivity: Activity, val mContext: Context) {
@@ -17,4 +19,9 @@ class HomeViewHolder(val mActivity: Activity, val mContext: Context) {
         }
 
     }
+
+    fun setToolbar(appCompatActivity: AppCompatActivity, toolBar: Toolbar){
+        appCompatActivity.setSupportActionBar(toolBar)
+    }
+
 }
