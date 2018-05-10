@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.annotation.RequiresApi
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.widget.Toast
@@ -21,8 +22,7 @@ import com.example.paulo.controleremoto.BR
 import com.example.paulo.controleremoto.R
 import com.example.paulo.controleremotoarduino.AdapterBluetooth
 import kotlinx.android.synthetic.main.activity_home.*
-import android.databinding.adapters.TextViewBindingAdapter.setText
-
+import kotlinx.android.synthetic.main.toolber_activity.*
 
 
 class HomeActivity : AppCompatActivity() {
@@ -30,7 +30,6 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var mBluetooth : BluetoothAdapter
     private val REQUEST_ENABLE_BLUETOOTH = 110
     private lateinit var mBluetoothDevicePaired: Set<BluetoothDevice>
-    private lateinit var mToolbar: Toolbar
 
     private lateinit var mHomeViewHolder: HomeViewHolder
 
@@ -50,14 +49,9 @@ class HomeActivity : AppCompatActivity() {
         mAdapterBluetooth = AdapterBluetooth(this, this, mArrayAdapter)
         mViewManager = LinearLayoutManager(this)
         mHomeViewHolder.setRecyclerView(recycler_view_home, mAdapterBluetooth, mViewManager)
+        mHomeViewHolder.setToolbar(this@HomeActivity, toolbarID)
 
         mBluetooth = BluetoothAdapter.getDefaultAdapter()
-
-        getReceiveDevices()
-
-        mToolbar = findViewById(R.id.toolbarID)
-
-        mHomeViewHolder.setToolbar(this, mToolbar)
 
         if(mBluetooth != null){
             if(!mBluetooth!!.isEnabled){
@@ -72,6 +66,8 @@ class HomeActivity : AppCompatActivity() {
 
 
     private fun findDevices() {
+        mHomeViewHolder.setProgressBar(true)
+
         if(mBluetooth.isDiscovering) {
             mBluetooth.cancelDiscovery()
 
@@ -89,6 +85,7 @@ class HomeActivity : AppCompatActivity() {
             val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
             registerReceiver(mBroadcastReceiver, filter)
         }
+        getReceiveDevices()
     }
 
     private fun getReceiveDevices(){
@@ -98,7 +95,6 @@ class HomeActivity : AppCompatActivity() {
                 if (action == BluetoothDevice.ACTION_FOUND) {
                     var device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                     runOnUiThread({
-
                         object : CountDownTimer(12000, 1000){
                             override fun onTick(millisUntilFinished: Long) {
                                 mArrayAdapter.add(ConstructorAdapter(if(device.name.isNullOrEmpty()) "Sem nome" else device.name, if(device.address.isNullOrEmpty()) "Sem mac" else device.address))
@@ -108,14 +104,31 @@ class HomeActivity : AppCompatActivity() {
                                 if(mArrayAdapter.isNotEmpty())
                                     mArrayAdapter.add(ConstructorAdapter(if(device.name.isNullOrEmpty()) "Sem nome" else device.name, if(device.address.isNullOrEmpty()) "Sem mac" else device.address))
                                 else
-                                    false
+                                    dialogMessageArrayDevicesIsEmpty()
 
+                                mHomeViewHolder.setProgressBar(false)
                             }
                         }
                     })
                 }
             }
         }
+    }
+
+    private fun dialogMessageArrayDevicesIsEmpty(){
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Nenhum dispositivo encontrado")
+        builder.setMessage("Deseja reinicializar à procura por novos dispositivos")
+        builder.setPositiveButton("Sim", {dialog, which ->
+            findDevices()
+        })
+        builder.setNegativeButton("Não", {dialog, which ->
+
+        })
+
+        val alertDialog = builder.create()
+        alertDialog.show()
     }
 
     private fun deviceAlreadyPaired(){
@@ -138,6 +151,10 @@ class HomeActivity : AppCompatActivity() {
             }
         }
     }
+//
+//    interface OnResponseFindDevices{
+//        fun
+//    }
 
 }
 
