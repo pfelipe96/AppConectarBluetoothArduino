@@ -83,6 +83,7 @@ class HomeActivity : AppCompatActivity() {
         if(mBluetoothDevicePaired.isNotEmpty()){
             mBluetoothDevicePaired.forEach{
                 mArrayAdapter.add(it.toString())
+                mAdapterBluetooth.notifyDataSetChanged()
             }
         }
     }
